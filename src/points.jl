@@ -31,8 +31,7 @@ Point
 StaticArrays.similar_type(::Type{P}, ::Type{T},
     ::StaticArrays.Size{(2,)}) where {P <: Point,T} = Point{T}
 
-Point(x::Number, y::Number) =
-    error("Cannot use `Point` with this combination of types.")
+Point(x::Number, y::Number) = error("Cannot use `Point` with this combination of types.")
 Point(x::Length, y::Length) = Point{promote_type(typeof(x),typeof(y))}(x,y)
 Point(x::InverseLength, y::InverseLength) = Point{promote_type(typeof(x),typeof(y))}(x,y)
 Point(x::Real, y::Real) = Point{promote_type(typeof(x),typeof(y))}(x,y)
@@ -40,14 +39,8 @@ Point(x::DimensionlessQuantity, y::DimensionlessQuantity) = Point(NoUnits(x), No
 
 convert(::Type{Point{T}}, x::IntPoint) where {T <: Real} = Point{T}(x.X, x.Y)
 
-const Dimless = Union{Real, DimensionlessQuantity{<:Real}}
-Base.promote_rule(::Type{Point{S}}, ::Type{Point{T}}) where {S <: Dimless, T <: Dimless} =
-    Point{promote_type(S,T)}
-Base.promote_rule(::Type{Point{S}}, ::Type{Point{T}}) where {S <: Length,T <: Length} =
-    Point{promote_type(S,T)}
-Base.promote_rule(::Type{Point{S}}, ::Type{Point{T}}) where
-    {S <: InverseLength, T <: InverseLength} =
-        Point{promote_type(S,T)}
+Base.promote_rule(::Type{Point{S}}, ::Type{Point{T}}) where {S, T} = Point{promote_type(S,T)}
+
 show(io::IO, p::Point) = print(io, "(",string(getx(p)),",",string(gety(p)),")")
 
 function reinterpret(::Type{T}, a::Point{S}) where {T,S}
@@ -67,12 +60,14 @@ Get the y-coordinate of a point. You can also use `p.y` or `p[2]`.
 """
 @inline gety(p::Point) = p.y
 
-for f in (:+, :-)
-    @eval Base.Broadcast.broadcasted(::typeof($f), a::AbstractArray, p::Point{T}) where {T} =
-        Base.Broadcast.broadcasted($f, a, StaticArrays.Scalar{typeof(p)}((p,)))
-    @eval Base.Broadcast.broadcast(::typeof($f), p::Point{T}, a::AbstractArray) where {T} =
-        Base.Broadcast.broadcasted($f, StaticArrays.Scalar{typeof(p)}((p,)), a)
-end
+Base.Broadcast.broadcasted(::typeof(+), a::AbstractArray, p::Point) =
+    Base.Broadcast.broadcasted(+, a, StaticArrays.Scalar{typeof(p)}((p,)))
+Base.Broadcast.broadcasted(::typeof(+), p::Point, a::AbstractArray) =
+    Base.Broadcast.broadcasted(+, StaticArrays.Scalar{typeof(p)}((p,)), a)
+Base.Broadcast.broadcasted(::typeof(-), a::AbstractArray, p::Point) =
+    Base.Broadcast.broadcasted(-, a, StaticArrays.Scalar{typeof(p)}((p,)))
+Base.Broadcast.broadcasted(::typeof(-), p::Point, a::AbstractArray) =
+    Base.Broadcast.broadcasted(-, StaticArrays.Scalar{typeof(p)}((p,)), a)
 
 """
     lowerleft{T}(A::AbstractArray{Point{T}})

@@ -1,4 +1,4 @@
-Examples on this page assume you have done `using Devices, Devices.PreferMicrons, FileIO`.
+Examples on this page assume you have done `using Devices, Devices.PreferMicrons`.
 
 ```@docs
     bridge!
@@ -14,7 +14,7 @@ Examples on this page assume you have done `using Devices, Devices.PreferMicrons
 
 Example:
 ```@example 1
-using Devices, Devices.PreferMicrons, FileIO # hide
+using Devices, Devices.PreferMicrons # hide
 c = Cell("main", nm)
 checkerboard!(c, 20μm, 10, false, GDSMeta(2))
 checkerboard!(c, 20μm, 10, true, GDSMeta(3))
@@ -28,7 +28,7 @@ save("checkers.svg", flatten(c)); nothing # hide
 
 Example:
 ```@example 2
-using Devices, Devices.PreferMicrons, FileIO # hide
+using Devices, Devices.PreferMicrons # hide
 c = Cell("main", nm)
 grating!(c, 100nm, 100nm, 5μm, GDSMeta(3))
 save("grating.svg", flatten(c)); nothing # hide
@@ -41,7 +41,7 @@ save("grating.svg", flatten(c)); nothing # hide
 
 Simple usage:
 ```@example 3
-using Devices, Devices.PreferMicrons, FileIO # hide
+using Devices, Devices.PreferMicrons # hide
 fingers = Cell("fingers", nm)
 wide, length, fingergap, fingeroffset, npairs, skiplast = 1μm, 20μm, 1μm, 3μm, 5, true
 interdigit!(fingers, wide, length, fingergap, fingeroffset, npairs, skiplast, GDSMeta(5))
@@ -51,7 +51,7 @@ save("fingers_only.svg", flatten(fingers)); nothing # hide
 
 Example of how to make an interdigitated capacitor inline with a feedline:
 ```@example 4
-using Devices, Devices.PreferMicrons, FileIO # hide
+using Devices, Devices.PreferMicrons # hide
 import Clipper
 c = Cell("main", nm)
 p = Path(μm)
@@ -81,7 +81,7 @@ save("fingers.svg", flatten(c)); nothing # hide
 
 Example:
 ```@example 5
-using Devices, Devices.PreferMicrons, FileIO # hide
+using Devices, Devices.PreferMicrons # hide
 c = Cell("pix", nm)
 layerpixels!(c, [1 2 3; -1 2 4], 5μm)
 save("layerpixels.svg", flatten(c)); nothing # hide
@@ -96,7 +96,7 @@ save("layerpixels.svg", flatten(c)); nothing # hide
 
 Example:
 ```@example 6
-using Devices, Devices.PreferMicrons, FileIO # hide
+using Devices, Devices.PreferMicrons # hide
 c = Cell("main", nm)
 p = Path(μm)
 straight!(p, 100μm, Paths.CPW(10μm, 6μm))
@@ -124,7 +124,7 @@ save("qubit.svg", flatten(c)); nothing # hide
 
 Example:
 ```@example 7
-using Devices, Devices.PreferMicrons, FileIO # hide
+using Devices, Devices.PreferMicrons # hide
 c = Cell("main", nm)
 radialcut!(c, 20μm, π/2, 5μm, GDSMeta(1))
 save("radialcut.svg", flatten(c)); nothing # hide
@@ -137,7 +137,7 @@ save("radialcut.svg", flatten(c)); nothing # hide
 
 Example:
 ```@example 8
-using Devices, Devices.PreferMicrons, FileIO # hide
+using Devices, Devices.PreferMicrons # hide
 c = Cell("main", nm)
 radialstub!(c, 20μm, π/2, 5μm, 1μm, GDSMeta(1))
 save("radialstub.svg", flatten(c)); nothing # hide
@@ -162,14 +162,14 @@ functionality.
 ### Inline demonstrations
 
 ```@example 9
-using Devices, FileIO # hide
+using Devices # hide
 path_to_output_gds = "characters.svg" # hide
 characters_demo(path_to_output_gds, true)
 ```
 <img src="../characters.svg" style="width:6in;"/>
 
 ```@example 10
-using Devices, FileIO # hide
+using Devices # hide
 path_to_output_gds = "scripted.svg" # hide
 scripted_demo(path_to_output_gds, true);
 ```

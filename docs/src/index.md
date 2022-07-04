@@ -26,7 +26,7 @@ Let's mock up a transmission line with two launchers and some bridges across the
 transmission line. We begin by making a cell with a rectangle in it:
 
 ```@example 1
-using Devices, Devices.PreferMicrons, FileIO
+using Devices, Devices.PreferMicrons
 
 cr = Cell("rect", nm)
 r = centered(Rectangle(20μm, 40μm))
@@ -109,7 +109,7 @@ all. **If you do not provide units, all values are presumed to be in microns.** 
 is otherwise the same:
 
 ```jl
-using Devices, FileIO
+using Devices
 
 cr = Cell("rect")
 r = centered(Rectangle(20,40))
@@ -151,7 +151,7 @@ It is also best to avoid writing statements in global scope. In other words, put
 your code in a function. Your CAD script should ideally look like the following:
 
 ```jl
-using Devices, Devices.PreferMicrons, FileIO
+using Devices, Devices.PreferMicrons
 using CoordinateTransformations
 using Clipper
 

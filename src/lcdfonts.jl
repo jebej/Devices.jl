@@ -1,16 +1,14 @@
 module LCDFonts
 
-import Devices
-import Devices: push!, render!, GDSMeta, Meta
+using Devices
+using Devices: push!, render!, GDSMeta, Meta
 
 using ..Rectangles
 using ..Points
 using ..Cells
 
-using FileIO
-
 using Unitful
-import Unitful: μm, nm
+using Unitful: μm, nm
 
 export lcdstring!
 export characters_demo

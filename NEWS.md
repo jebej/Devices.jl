@@ -1,3 +1,5 @@
+- v0.6.0
+  - Remove FileIO.
 - v0.5.1
   - Support for julia 1.0+ versions. Removed REQUIRE file and created Project.toml
 - v0.5.0
@@ -100,7 +102,7 @@
   - Bug fixes.
   - Added `XReflection` and `YReflection` transformations.
 - v0.0.2
-  - Introduced GDS-II import capability. After `using FileIO`, `load` will return a dictionary
+  - Introduced GDS-II import capability. The `load` function will return a dictionary
     with string keys (names of cells) and Cell values.
   - Introduced sharp bends in paths via `corner!`.
   - Added unit support.

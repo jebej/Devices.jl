@@ -1,19 +1,17 @@
 module GDS
 using Dates
 using Unitful
-import Unitful: Length, fm, pm, nm, μm, m, °
+using Unitful: Length, fm, pm, nm, μm, m, °
 
 import Base: bswap, bitstring, convert, write, read
-import Devices: DEFAULT_LAYER, DEFAULT_DATATYPE, GDSMeta, layer, datatype, points, render!
+using Devices: DEFAULT_LAYER, DEFAULT_DATATYPE, GDSMeta, layer, datatype, points, render!
 using ..Points
-import ..Rectangles: Rectangle
-import ..Polygons: Polygon
+using ..Rectangles: Rectangle
+using ..Polygons: Polygon
 using ..Cells
 
-import FileIO: File, @format_str, load, save, stream, magic, skipmagic
-
 export GDS64
-export gdsbegin, gdsend, gdswrite
+export gdsbegin, gdsend, gdswrite, savegds, loadgds
 
 const GDSVERSION   = UInt16(600)
 const HEADER       = 0x0002
@@ -445,11 +443,11 @@ end
 gdsend(io::IO) = gdswrite(io, ENDLIB)
 
 """
-    save(::Union{AbstractString,IO}, cell0::Cell{T}, cell::Cell...)
-    save(f::File{format"GDS"}, cell0::Cell, cell::Cell...;
+    savegds(::Union{AbstractString,IO}, cell0::Cell{T}, cell::Cell...;
         name="GDSIILIB", userunit=1μm, modify=now(), acc=now(),
         verbose=false)
-This bottom method is implicitly called when you use the convenient syntax of
+
+This method is implicitly called when you use the convenient syntax of
 the top method: `save("/path/to/my.gds", cells_i_want_to_save...)`
 
 Keyword arguments include:
@@ -462,15 +460,13 @@ Keyword arguments include:
   - `verbose`: monitor the output of [`traverse!`](@ref) and [`order!`](@ref) to see if
     something funny is happening while saving.
 """
-function save(f::File{format"GDS"}, cell0::Cell, cell::Cell...;
+function savegds(f::AbstractString, cell0::Cell, cell::Cell...;
         name="GDSIILIB", userunit=1μm, modify=now(), acc=now(), verbose=false)
     dbs = dbscale(cell0, cell...)
     pad = mod(length(name), 2) == 1 ? "\0" : ""
-    open(f, "w") do s
-        io = stream(s)
+    open(f, "w") do io
         bytes = 0
-        bytes += write(io, magic(format"GDS"))
-        bytes += write(io, 0x02, 0x58)
+        bytes += write(io, 0x00, 0x06, 0x00, 0x02, 0x02, 0x58) # magic bytes
         bytes += gdsbegin(io, name*pad, dbs, userunit, modify, acc)
         a = Tuple{Int,Cell}[]
         traverse!(a, cell0)
@@ -496,13 +492,13 @@ function save(f::File{format"GDS"}, cell0::Cell, cell::Cell...;
 end
 
 """
-    load(f::File{format"GDS"}; verbose::Bool=false, nounits::Bool=false)
+    loadgds(f::AbstractString; verbose::Bool=false, nounits::Bool=false)
 A dictionary of top-level cells (`Cell` objects) found in the GDS-II file is
 returned. The dictionary keys are the cell names. The other cells in the GDS-II
 file are retained by `CellReference` or `CellArray` objects held by the
 top-level cells. Currently, cell references and arrays are not implemented.
 
-The FileIO package recognizes files based on "magic bytes" at the start of the
+This package recognizes files based on "magic bytes" at the start of the
 file. To permit any version of GDS-II file to be read, we consider the magic
 bytes to be the GDS HEADER tag (`0x0002`), preceded by the number of bytes in
 total (`0x0006`) for the entire HEADER record. The last well-documented version
@@ -526,11 +522,11 @@ GDS-II record types, but also BGNLIB and LIBNAME).
 If `nounits` is true, `Cell{Float64}` objects will be returned, where 1.0
 corresponds to one micron.
 """
-function load(f::File{format"GDS"}; verbose::Bool=false, nounits::Bool=false)
+function loadgds(f::AbstractString; verbose::Bool=false, nounits::Bool=false)
     cells = Dict{String, Cell}()
     open(f) do s
         # Skip over GDS-II header record
-        skipmagic(s)
+        magic = read(s, UInt32)
         version = ntoh(read(s, UInt16))
         verbose && @info(string("Reading GDS-II v", repr(version)))
 

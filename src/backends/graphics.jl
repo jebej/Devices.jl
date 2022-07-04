@@ -1,15 +1,15 @@
 module Graphics
 using Unitful
-import Unitful: Length, fm, pm, nm, μm, m, inch, ustrip
-import Cairo
+using Unitful: Length, fm, pm, nm, μm, m, inch, ustrip
+using Cairo
 
-import Devices: bounds, layer, datatype
+using Devices: bounds, layer, datatype
 using ..Points
-import ..Rectangles: Rectangle, width, height
-import ..Polygons: Polygon, points
+using ..Rectangles: Rectangle, width, height
+using ..Polygons: Polygon, points
 using ..Cells
 
-import FileIO: File, @format_str, load, save, stream
+export savesvg, savepdf, saveeps, savepng
 
 # https://www.w3schools.com/colors/colors_palettes.asp
 const layercolors = Dict(
@@ -125,27 +125,23 @@ function poly!(cr::Cairo.CairoContext, pts)
     Cairo.close_path(cr)
 end
 
-function save(f::File{format"SVG"}, c0::Cell; options...)
-    open(f, "w") do s
-        io = stream(s)
+function savesvg(f::AbstractString, c0::Cell; options...)
+    open(f, "w") do io
         show(io, MIME"image/svg+xml"(), c0; options...)
     end
 end
-function save(f::File{format"PDF"}, c0::Cell; options...)
-    open(f, "w") do s
-        io = stream(s)
+function savepdf(f::AbstractString, c0::Cell; options...)
+    open(f, "w") do io
         show(io, MIME"application/pdf"(), c0; options...)
     end
 end
-function save(f::File{format"EPS"}, c0::Cell; options...)
-    open(f, "w") do s
-        io = stream(s)
+function saveeps(f::AbstractString, c0::Cell; options...)
+    open(f, "w") do io
         show(io, MIME"application/postscript"(), c0; options...)
     end
 end
-function save(f::File{format"PNG"}, c0::Cell; options...)
-    open(f, "w") do s
-        io = stream(s)
+function savepng(f::AbstractString, c0::Cell; options...)
+    open(f, "w") do io
         show(io, MIME"image/png"(), c0; options...)
     end
 end

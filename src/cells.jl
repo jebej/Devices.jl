@@ -693,15 +693,15 @@ as that will flatten with unlimited depth.
 """
 function flatten(c::CellArray; depth::Integer=-1, name=uniquename("flatten"))
     sgn = c.xrefl ? -1 : 1
-    a = Translation(c.origin) ∘ CoordinateTransformations.LinearMap(
+    am = CoordinateTransformations.LinearMap(
         StaticArrays.@SMatrix [c.mag*cos(c.rot) -c.mag*sgn*sin(c.rot);
                                c.mag*sin(c.rot)  c.mag*sgn*cos(c.rot)])
     cflat = flatten(c.cell; depth=depth-1)
-    pts = [(i-1) * c.deltarow + (j-1) * c.deltacol for i in 1:c.row for j in 1:c.col]
+    pts = [c.origin + (i-1) * c.deltarow + (j-1) * c.deltacol for i in 1:c.row, j in 1:c.col]
     pts2 = reshape(reinterpret(StaticArrays.Scalar{eltype(pts)}, vec(pts)), (1,length(pts)))
-    newelements = a.(cflat.elements .+ pts2) # add each point in pts to each polygon
-    newrefs = a.(cflat.refs .+ pts2)
-    Cell(name, (@view newelements[:]), (@view newrefs[:]))
+    newelements = am.(cflat.elements) .+ pts2 # add each point in pts to each polygon
+    newrefs = am.(cflat.refs) .+ pts2
+    Cell(name, vec(newelements), vec(newrefs))
 end
 
 """

@@ -1,5 +1,5 @@
 using Test
-using Devices, Unitful, FileIO
+using Devices, Unitful
 import Unitful: s, DimensionError
 import Clipper
 import ForwardDiff
@@ -33,10 +33,10 @@ const tdir = mktempdir()
         @test typeof(Point(2,3.)) == Point{Float64}
         @test typeof(Point(2.,3)) == Point{Float64}
         @test typeof(Point(2m2μm,3.0m2μm)) == Point{typeof(3.0m2μm)}
-        @test typeof(Point(2m2μm,3cm2μm)) == Point{typeof(2μm2μm//1)}
+        @test typeof(Point(2m2μm,3cm2μm)) == Point{typeof(2μm2μm)}
         @test typeof(Point(2.0m2μm,3cm2μm)) == Point{typeof(2.0μm2μm)}
         @test typeof(Point(2m2nm,3.0m2nm)) == Point{typeof(3.0m2nm)}
-        @test typeof(Point(2m2nm,3cm2nm)) == Point{typeof(2nm2nm//1)}
+        @test typeof(Point(2m2nm,3cm2nm)) == Point{typeof(2nm2nm)}
         @test typeof(Point(2.0m2nm,3cm2nm)) == Point{typeof(2.0nm2nm)}
         @test typeof(Point(1.0/μm2μm, 1.0/nm2μm)) == Point{typeof(1.0/μm2μm)}
         @test typeof(Point(1.0/μm2nm, 1.0/nm2nm)) == Point{typeof(1.0/nm2nm)}
@@ -52,12 +52,12 @@ const tdir = mktempdir()
         @test 3*Point(1,1) === Point(3,3)
         @test Point(2m2μm,3m2μm) + Point(4m2μm,5m2μm) === Point(6m2μm,8m2μm)
         @test Point(2m2μm,3m2μm) + Point(4cm2μm,5cm2μm) ===
-            Point(2040000μm2μm//1,3050000μm2μm//1)
+            Point(2040000μm2μm,3050000μm2μm)
         @test Point(2.0m2μm,3m2μm) + Point(4cm2μm,5cm2μm) ===
             Point(2040000.0μm2μm,3050000.0μm2μm)
         @test Point(2m2nm,3m2nm) + Point(4m2nm,5m2nm) === Point(6m2nm,8m2nm)
         @test Point(2m2nm,3m2nm) + Point(4cm2nm,5cm2nm) ===
-            Point(2040000000nm2nm//1,3050000000nm2nm//1)
+            Point(2040000000nm2nm,3050000000nm2nm)
         @test Point(2.0m2nm,3m2nm) + Point(4cm2nm,5cm2nm) ===
             Point(2040000000.0nm2nm,3050000000.0nm2nm)
     end
@@ -113,7 +113,7 @@ const tdir = mktempdir()
 
     @testset "> Point promotion" begin
         @test promote_type(typeof(Point(1,2)), typeof(Point(1μm/nm, 1μm/nm))) ==
-            Point{Rational{Int}}
+            Point{Int}
         @test promote_type(typeof(Point(1,2)), typeof(Point(1μm/nm, 1nm/μm))) ==
             Point{Rational{Int}}
         @test promote_type(typeof(Point(1.0nm,2.0nm)), typeof(Point(1.0cm, 1.0cm))) ==
@@ -133,7 +133,7 @@ end
 
         # with units
         # @test typeof(Rectangle(Point(1m,2cm), Point(3nm,4μm))) ==
-            # Rectangle{typeof(1ru//1)} #TODO: uncomment once Julia #18465 is fixed
+        #     Rectangle{typeof(1ru//1)} #TODO: uncomment once Julia #18465 is fixed
 
         # width and height constructor
         @test typeof(Rectangle(1,2)) == Rectangle{Int}
@@ -142,7 +142,7 @@ end
     end
 
     @testset "> Polygon construction" begin
-        @test_throws ErrorException Polygon(Point(1,2), Point(3,5), Point(4cm2μm,7cm2μm))
+        @test_throws TypeError Polygon(Point(1,2), Point(3,5), Point(4cm2μm,7cm2μm))
     end
 
     @testset "> Rectangle methods" begin

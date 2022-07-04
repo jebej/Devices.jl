@@ -1,13 +1,12 @@
 module Devices
 using Random, LinearAlgebra
 using ForwardDiff
-using FileIO
+
 include("units.jl")
 
 import StaticArrays
 import Clipper
 import Clipper: libcclipper
-import FileIO: save, load
 
 import Base: length, show, eltype, intersect!
 import Unitful: Length, LengthUnits, DimensionlessQuantity, NoUnits, DimensionError
@@ -49,9 +48,6 @@ function __init__()
     # To ensure no crashes
     global _clip = Ref(Clipper.Clip())
     global _coffset = Ref(Clipper.ClipperOffset())
-    # The magic bytes are the GDS HEADER tag (0x0002), preceded by the number of
-    # bytes in total (6 == 0x0006) for the HEADER record.
-    add_format(format"GDS", UInt8[0x00, 0x06, 0x00, 0x02], ".gds")
 end
 
 # The following functions are imported by submodules and have methods
@@ -273,6 +269,33 @@ export Microwave,
 
 include("backends/gds.jl")
 include("backends/graphics.jl")
+import .GDS: savegds, loadgds
+import .Graphics: savesvg, savepdf, saveeps, savepng
+function save(f::AbstractString, c0::Cell, cell::Cell...; options...)
+    ext = lowercase(last(splitext(f)))
+    if ext == ".gds"
+        savegds(f, c0, cell...; options...)
+    elseif ext == ".svg"
+        savesvg(f, c0; options...)
+    elseif ext == ".pdf"
+        savepdf(f, c0; options...)
+    elseif ext == ".eps"
+        saveeps(f, c0; options...)
+    elseif ext == ".png"
+        savepng(f, c0; options...)
+    else
+        @error "Invalid file extension! Use \"gds\", \"svg\", \"pdf\", \"eps\", or \"png\"."
+    end
+end
+function load(f::AbstractString; options...)
+    ext = lowercase(last(splitext(f)))
+    if ext == ".gds"
+        loadgds(f; options...)
+    else
+        @error "Invalid file extension! This package only supports \"gds\"."
+    end
+end
+export save, savegds, savesvg, savepdf, saveeps, savepng, load, loadgds
 
 include("lcdfonts.jl")
 import .LCDFonts:

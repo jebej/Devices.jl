@@ -37,7 +37,7 @@ The following example illustrates the use of automatic tapering. First, we
 construct a taper with two different traces surrounding it:
 
 ```@example 1
-using Devices, Devices.PreferMicrons, FileIO # hide
+using Devices, Devices.PreferMicrons # hide
 
 p = Path(μm)
 straight!(p, 10μm, Paths.Trace(2.0μm))
